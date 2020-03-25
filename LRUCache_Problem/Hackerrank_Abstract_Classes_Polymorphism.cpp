@@ -55,6 +55,7 @@ void LRUCache::CacheHitUpdate(Node* tempNode, int key, int val)
     //for the node thats hit, link the prev and next node together, then re-arrange the cache hit key/value pair to the head
     tempNode->key = key;
     tempNode->value = val;
+    mp[key] = tempNode; //update node update to map storage (for quicker access only)
     //linking prior and next nodes
     if (head != tempNode)
     {
@@ -79,13 +80,12 @@ void LRUCache::CacheHitUpdate(Node* tempNode, int key, int val)
 */
 Node* LRUCache::isKeyInLinkedList(int key)
 {
-    Node* itr;
-    itr = head;
+    Node* itr;   
 
-    while (itr != NULL)
+    itr = mp[key];
+    if (itr != NULL && itr->key != key) //make sure the keys match, just incase the retrieved node has junk data
     {
-        if (itr->key == key) break;
-        itr = itr->next;
+        itr = NULL;
     }
     return itr;
 }
@@ -101,6 +101,7 @@ void LRUCache::set(int key, int val)
         if (nodeEntries == 0)
         {
             head = new Node(key, val);
+            mp[key] = head;
             tail = head;
             head->next = NULL;
             head->prev = NULL;
@@ -114,6 +115,7 @@ void LRUCache::set(int key, int val)
                 tempNode = new Node(key, val);
                 tempNode->next = head;
                 tempNode->prev = NULL;
+                mp[key] = tempNode;
                 head->prev = tempNode;
                 head = tempNode;
                 nodeEntries++;
@@ -121,6 +123,7 @@ void LRUCache::set(int key, int val)
             else
             {
                 getNode->value = val;
+                mp[key] = getNode;
                 if (getNode != head) // no need to update position if already at head
                 {
                     //move node with found key to the front   
@@ -146,6 +149,7 @@ void LRUCache::set(int key, int val)
             //we don't have to erase or create any nodes, just change the key/value contents of existing nodes
 
             //puts the new key/value pair into the tail; then re-arrange the node to become the head
+            mp[tail->key] = NULL; //delete node in map with old key
             tail->key = key;
             tail->value = val;
             if (head != tail)
@@ -157,6 +161,7 @@ void LRUCache::set(int key, int val)
                 head = tail;
                 tail = tail->prev; //pre-tail becomes new the tail
                 head->prev = NULL;
+                mp[key] = head;
             }
         }
         else
@@ -180,9 +185,6 @@ int LRUCache::get(int key)
         CacheHitUpdate(tempNode,key,tempNode->value);
         return tempNode->value;
     } 
-    
-
-    //TODO - implement map container to speed up searching!
 }
 
 void PrintKeysInNode(Node* node)
