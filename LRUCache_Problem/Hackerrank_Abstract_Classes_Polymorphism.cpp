@@ -36,7 +36,7 @@ class LRUCache : public Cache {
 
     //private functions
     Node* isKeyInLinkedList(int);
-    void cacheHitUpdate(Node*);
+    void CacheHitUpdate(Node*,int,int);
 public:    
     void set(int, int);
     int get(int);
@@ -48,22 +48,25 @@ public:
     }
 };
 
-void LRUCache::cacheHitUpdate(Node* tempNode)
+void LRUCache::CacheHitUpdate(Node* tempNode, int key, int val)
 {
     //Cache hit
     //for the node thats hit, link the prev and next node together, then re-arrange the cache hit key/value pair to the head
     tempNode->key = key;
     tempNode->value = val;
     //linking prior and next nodes
-    if (tempNode->prev != NULL)
-        tempNode->prev->next = tempNode->next;
-    if (tempNode->next != NULL)
-        tempNode->next->prev = tempNode->prev;
-    //makes temp node the head
-    head->prev = tempNode;
-    tempNode->next = head;
-    head = tempNode;
+    if (head != tempNode)
+    {
+        if (tempNode->prev != NULL)
+            tempNode->prev->next = tempNode->next;
+        if (tempNode->next != NULL)
+            tempNode->next->prev = tempNode->prev;
+        //makes temp node the head
+        head->prev = tempNode;
+        tempNode->next = head;
+        head = tempNode;
     }
+
 }
 
 
@@ -156,7 +159,7 @@ void LRUCache::set(int key, int val)
         }
         else
         {
-            CacheHitUpdate(tempNode);       
+            CacheHitUpdate(tempNode,key,val);       
         }
     }
 }
@@ -171,7 +174,8 @@ int LRUCache::get(int key)
     }
     else
     {
-        cacheHitUpdate(tempNode);
+        //technically writing the same key/value again, but allows code reuse for setting Cache Hits
+        CacheHitUpdate(tempNode,key,tempNode->value);
         return tempNode->value;
     } 
     
