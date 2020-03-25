@@ -25,10 +25,11 @@ protected:
     map<int, Node*> mp; //map the key to the node in the linked list
     int cp = 0;  //capacity
     Node* tail = NULL; // double linked list tail pointer
-    Node* head = NULL; // double linked list head pointer
+   
     virtual void set(int, int) = 0; //set function
     virtual int get(int) = 0; //get function
-
+public:
+    Node* head = NULL; // double linked list head pointer
 };
 
 class LRUCache : public Cache {
@@ -152,8 +153,9 @@ void LRUCache::set(int key, int val)
                 //only update linked list if there is more than 1 element
                 tail->next = head;
                 tail->prev->next = NULL;
-                head->prev = tail;                 
+                head->prev = tail;  //tail is about to be the new head             
                 head = tail;
+                tail = tail->prev; //pre-tail becomes new the tail
                 head->prev = NULL;
             }
         }
@@ -183,12 +185,23 @@ int LRUCache::get(int key)
     //TODO - implement map container to speed up searching!
 }
 
+void PrintKeysInNode(Node* node)
+{
+    while (node != NULL)
+    {
+        printf("%d:%d  ", node->key, node->value);
+        node = node->next;
+    }
+    printf("END\n");
+}
+
 int main() {
     int n, capacity, i;
     cin >> n >> capacity;
     LRUCache l(capacity);
     for (i = 0; i < n; i++) {
         string command;
+        PrintKeysInNode(l.head);
         cin >> command;
         if (command == "get") {
             int key;
